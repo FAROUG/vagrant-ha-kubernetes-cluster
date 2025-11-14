@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
   # New variables for dynamic IP ranges:
   MASTER_START_IP  = 101 # Masters will be .101, .102, .103...
   WORKER_START_IP  = 121 # Workers will be .121, .122...
-  LB_IP            = "192.168.1.99" # The stable Virtual IP for the API
+  LB_IP            = "192.168.1.100" # The stable Virtual IP for the API
   VM_NETWORK       = "public_network"
   # ====================================================
 
@@ -174,7 +174,7 @@ EOF
       ip: LB_IP
 
     # Provision the load balancer using an inline script and Ruby variables
-    lb.vm.provision "shell", run: "always", inline: <<-SHELL
+    lb.vm.provision "shell", run: "once", inline: <<-SHELL
       echo "--- LB: Setting up HAProxy Dynamically ---"
       sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
 

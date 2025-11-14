@@ -7,7 +7,7 @@ echo "======================================================"
 
 # Define the interface name
 INTERFACE="enp0s8"
-ENDPOINT_IP="192.168.1.99:6443" # The LB IP
+ENDPOINT_IP="192.168.1.100:6443" # The LB IP
 
 # Define the reuired user and the current user
 REQUIRED_USER="vagrant"
