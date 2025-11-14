@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
   # New variables for dynamic IP ranges:
   MASTER_START_IP  = 101 # Masters will be .101, .102, .103...
   WORKER_START_IP  = 121 # Workers will be .121, .122...
-  LB_IP            = "192.168.1.99" # The stable Virtual IP for the API
+  LB_IP            = "192.168.1.100" # The stable Virtual IP for the API
   VM_NETWORK       = "public_network"
   # ====================================================
 
