@@ -12,6 +12,9 @@ if Vagrant::Util::Platform.linux?
 elsif Vagrant::Util::Platform.darwin?
   default_interface_name = `route get default | grep interface | awk '{print $2}'`.strip
 elsif Vagrant::Util::Platform.windows?
+  # Provide the full default path to VBoxManage.exe for Windows hosts
+  vbox_command = "C:\\Program Files\\Oracle\\VirtualBox\\VBoxManage.exe"
+
   powershell_command = <<-PS
     \$interface = Get-NetAdapter | Where-Object { 
       (Get-NetIPConfiguration -InterfaceIndex \$_.InterfaceIndex).IPv4DefaultGateway -ne \$null 
