@@ -174,7 +174,7 @@ EOF
       ip: LB_IP
 
     # Provision the load balancer using an inline script and Ruby variables
-    lb.vm.provision "shell", run: "always", inline: <<-SHELL
+    lb.vm.provision "shell", run: "once", inline: <<-SHELL
       echo "--- LB: Setting up HAProxy Dynamically ---"
       sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
 
