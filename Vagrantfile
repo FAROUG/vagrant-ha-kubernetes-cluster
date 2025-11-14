@@ -1,6 +1,41 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# --- Dynamic Bridge Interface Detection ---
+# This Ruby code runs on the HOST machine to find the active network interface.
+
+$network_interface = nil
+
+# For Linux hosts (Ubuntu, Fedora, etc.)
+if Vagrant::Util::Platform.linux?
+  $network_interface = `ip route | awk '/^default/ {printf "%s", $5; exit 0}'`.strip
+end
+
+# For macOS hosts (Darwin)
+if Vagrant::Util::Platform.darwin?
+  # Finds the active interface name (e.g., en0, en4)
+  $network_interface = `route get default | grep interface | awk '{print $2}'`.strip
+end
+
+# For Windows hosts
+if Vagrant::Util::Platform.windows?
+  # This PowerShell command finds the interface description of the default gateway's adapter
+  powershell_command = <<-PS
+    \$interface = Get-NetAdapter | Where-Object { 
+      (Get-NetIPConfiguration -InterfaceIndex \$_.InterfaceIndex).IPv4DefaultGateway -ne \$null 
+    } | Select-Object -First 1 -ExpandProperty Name
+    Write-Output \$interface
+  PS
+  # Execute PowerShell and capture the output
+  $network_interface = `powershell -Command "#{powershell_command}"`.strip
+end
+
+# Add a fallback just in case automatic detection fails
+if $network_interface.nil? || $network_interface.empty?
+  puts "Warning: Automatic network interface detection failed. Vagrant will prompt you to select one."
+end
+
+
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
@@ -13,7 +48,9 @@ Vagrant.configure("2") do |config|
   IP_SUBNET_BASE = "192.168.1" # !! Match your Wi-Fi network subnet !!
 
   BASE_BOX = "bento/ubuntu-22.04" # e.g., "ubuntu/focal64"
-  BRIDGE_INTERFACE = "en0: Wi-Fi" # Your specific Wi-Fi adapter
+  # Use the dynamically found interface name here:
+  BRIDGE_INTERFACE = $network_interface
+  # BRIDGE_INTERFACE = "en0: Wi-Fi" # Your specific Wi-Fi adapter
 
   # New variables for dynamic IP ranges:
   MASTER_START_IP  = 101 # Masters will be .101, .102, .103...
