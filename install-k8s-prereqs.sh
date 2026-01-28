@@ -135,6 +135,24 @@ newgrp containerd
 ls -ltrh /run/containerd/containerd.sock
 crictl version
 
+# Install the etcdct
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y etcd-client
+sudo mkdir -p /backup
+# Set environment variables for authentication using kubeadm certs
+export ETCDCTL_API=3
+export ETCDCTL_ENDPOINTS=https://127.0.0.1:2379 
+export ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt
+export ETCDCTL_CERT=/etc/kubernetes/pki/etcd/server.crt
+export ETCDCTL_KEY=/etc/kubernetes/pki/etcd/server.key
+
+# List cluster members
+etcdctl member list \
+ --write-out=table
+
+# Get cluster health status
+etcdctl endpoint health \
+ --write-out=table
+
 # Ensure the bash-completion package is installed system-wide
 sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y bash-completion
 
