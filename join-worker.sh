@@ -47,4 +47,9 @@ EOF
 
 # The rest of your script goes here (runs as the original user, root in your case)
 echo "Script is running with the correct user: $CURRENT_USER"
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
 echo "Ran WORKER NODE setup script"
