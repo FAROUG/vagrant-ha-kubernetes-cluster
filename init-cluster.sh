@@ -101,3 +101,11 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 # The rest of your script goes here (runs as the original user, root in your case)
 echo "Script is running with the correct user: $CURRENT_USER"
+
+# Helm package manager Installation
+sudo curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+sudo chmod 700 get_helm.sh
+sudo ./get_helm.sh
+sudo helm version
+
+
