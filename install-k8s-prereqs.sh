@@ -138,5 +138,25 @@ crictl version
 # Ensure the bash-completion package is installed system-wide
 sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y bash-completion
 
+# Append the configuration lines to the target user's .bashrc file
+# Use 'tee' with sudo to write to a file owned by another user/root if necessary
+# or ensure the script is run as the target user for this part.
+echo '# Enable bash-completion and kubectl autocompletion' | sudo -u "$REQUIRED_USER" tee -a /home/"$REQUIRED_USER"/.bashrc > /dev/null
+echo 'source /usr/share/bash-completion/bash_completion' | sudo -u "$REQUIRED_USER" tee -a /home/"$REQUIRED_USER"/.bashrc > /dev/null
+echo 'source <(kubectl completion bash)' | sudo -u "$REQUIRED_USER" tee -a /home/"$REQUIRED_USER"/.bashrc > /dev/null
+
+# Optional: Add an alias for convenience
+echo 'alias k=kubectl' | sudo -u "$REQUIRED_USER" tee -a /home/"$REQUIRED_USER"/.bashrc > /dev/null
+echo 'complete -F __start_kubectl k' | sudo -u "$REQUIRED_USER" tee -a /home/"$REQUIRED_USER"/.bashrc > /dev/null
+
+
+echo '# Enable bash-completion and kubectl autocompletion' | sudo -u "$CURRENT_USER" tee -a /"$CURRENT_USER"/.bashrc > /dev/null
+echo 'source /usr/share/bash-completion/bash_completion' | sudo -u "$CURRENT_USER" tee -a /"$CURRENT_USER"/.bashrc > /dev/null
+echo 'source <(kubectl completion bash)' | sudo -u "$CURRENT_USER" tee -a /"$CURRENT_USER"/.bashrc > /dev/null
+
+# Optional: Add an alias for convenience
+echo 'alias k=kubectl' | sudo -u "$CURRENT_USER" tee -a /"$CURRENT_USER"/.bashrc > /dev/null
+echo 'complete -F __start_kubectl k' | sudo -u "$CURRENT_USER" tee -a /"$CURRENT_USER"/.bashrc > /dev/null
+
 
 echo "--- COMMON: Prereqs done ---"
