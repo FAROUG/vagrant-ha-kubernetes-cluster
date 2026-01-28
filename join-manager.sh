@@ -8,8 +8,12 @@ echo "--- SECONDARY MASTER: Waiting for the control plane join command ---"
 
 # Define the reuired user and the current user
 REQUIRED_USER="vagrant"
+INTERFACE="enp0s8"
 CURRENT_USER=$(id -u -n)
 K8S_SHARE_DIR="/vagrant/cluster_data"
+
+# Command to get only the IPv4 address for the specified interface
+PRIVATE_IP=$(ip -4 addr show "$INTERFACE" | awk '/inet / {print $2}' | cut -d/ -f1)
 
 # Wait for the master join command file to appear
 TIMEOUT=300
@@ -20,9 +24,16 @@ done
 
 if [ -f $K8S_SHARE_DIR/join_cmd_master.sh ]; then
   echo "--- SECONDARY MASTER: Control Plane join command found. Executing now ---"
+
+  sudo sed -i "s/\(--apiserver-advertise-address \)[^[:space:]]*\$/\1$PRIVATE_IP/" "$K8S_SHARE_DIR/join_cmd_master.sh"
+  # sudo sed -i "s/PRIVATEIP/$PRIVATE_IP/g"  $K8S_SHARE_DIR/join_cmd_master.sh
+
   # Execute the command found in the file
   sh $K8S_SHARE_DIR/join_cmd_master.sh 
   echo "--- SECONDARY MASTER: Kubeadm join executed ---"
+  echo "--- Generating a New Cluster Token ---"
+  NEW_TOKEN=$(sudo kubeadm token create)
+  sed -i "s/\(--token \)[^[:space:]]*/\1$NEW_TOKEN/" "$K8S_SHARE_DIR/join_cmd_master.sh"
 else
   echo "--- SECONDARY MASTER: Timeout waiting for master join command! Cluster join failed. ---"
   exit 1
@@ -44,7 +55,11 @@ kubectl get pods -A -o wide
 # --- End of commands running as the vagrant user ---
 EOF
 
-
 # The rest of your script goes here (runs as the original user, root in your case)
 echo "Script is running with the correct user: $CURRENT_USER"
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
 echo "Ran MANAGER NODE setup script"
