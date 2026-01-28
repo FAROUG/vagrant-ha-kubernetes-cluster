@@ -54,10 +54,19 @@ sudo mkdir -m 0755 -p /etc/apt/keyrings
 curl -fsSL https://pkgs.k8s.io/core:/stable:/$KUBERNETES_VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$KUBERNETES_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
+# Add Docker Repo
+# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+# sudo chmod a+r /etc/apt/keyrings/docker.gpg
+# echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+
 # Install kubeadm, kubelet, kubectl
 sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
+
+# sudo DEBIAN_FRONTEND=noninteractive apt-get install docker-ce docker-ce-cli docker-buildx-plugin docker-compose-plugin -y
+
 
 containerd config default | sudo tee /etc/containerd/config.toml >/dev/null
 
@@ -152,6 +161,62 @@ etcdctl member list \
 # Get cluster health status
 etcdctl endpoint health \
  --write-out=table
+
+# Add Docker Repo
+# sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
+
+# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+# sudo chmod a+r /etc/apt/keyrings/docker.gpg
+# echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
+
+# sudo DEBIAN_FRONTEND=noninteractive apt-get install docker-ce docker-ce-cli docker-buildx-plugin docker-compose-plugin -y
+# sudo usermod -aG docker $REQUIRED_USER
+
+
+
+#-----------------------------------------
+
+# # 1. Add Docker's official GPG key and repository
+# sudo apt-get update -y
+# sudo apt-get install ca-certificates curl gnupg lsb-release -y # Ensure prerequisites are installed
+# sudo mkdir -p /etc/apt/keyrings
+# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+# sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# echo \
+#   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+#   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# # 2. Install the Docker packages
+# sudo apt-get update -y
+# sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+# # 3. Configure Docker to use a separate data root path (CRITICAL STEP)
+# # This prevents Docker from touching the K8s-specific containerd configuration or overlay networking.
+# sudo mkdir -p /etc/docker
+# cat <<EOF | sudo tee /etc/docker/daemon.json
+# {
+#   "data-root": "/var/lib/docker-data",
+#   "exec-opts": ["native.cgroupdriver=systemd"],
+#   "log-driver": "json-file",
+#   "log-opts": {
+#     "max-size": "100m"
+#   },
+#   "storage-driver": "overlay2"
+# }
+# EOF
+
+# # 4. Restart Docker service to apply the configuration change
+# sudo systemctl restart docker
+
+# # 5. Add the user to the docker group (allows running docker without sudo)
+# sudo usermod -aG docker "$REQUIRED_USER"
+
+# # 6. Verify installation and check if a new docker0 bridge was created (it should be fine)
+# echo "Docker installed and configured with a separate data root."
+#-----------------------------------------
 
 # Ensure the bash-completion package is installed system-wide
 sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y bash-completion

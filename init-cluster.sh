@@ -102,6 +102,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 # The rest of your script goes here (runs as the original user, root in your case)
 echo "Script is running with the correct user: $CURRENT_USER"
 
+
 # Helm package manager Installation
 sudo curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 sudo chmod 700 get_helm.sh
@@ -109,3 +110,39 @@ sudo ./get_helm.sh
 sudo helm version
 
 
+# a. Installing Gateway API with NGINX
+# What this does:
+# Installs the NGINX Gateway Controller, along with the Gateway API Custom Resource Definitions (CRDs) and related resources.
+
+
+# 1. Install Standard Channel
+# kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
+# or
+# kubectl kustomize "https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.5.1" | kubectl apply -f -
+
+# 2. Install Experimental Channel
+# kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/experimental-install.yaml
+# or 
+# kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v1.6.1/deploy/crds.yaml
+# 3. Deploy NGINX Gateway Fabric into a Kubernetes cluster using Helm package manager
+# helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --create-namespace -n nginx-gateway
+# or 
+# kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v1.6.1/deploy/nodeport/deploy.yaml
+
+# 4. Verify the Deployment
+# kubectl get pods -n nginx-gateway
+# 5. View the nginx-gateway service
+# kubectl get svc -n nginx-gateway nginx-gateway -o yaml
+
+# 6. Update the nginx-gateway service to expose ports 30080 for HTTP and 30081 for HTTPS
+# kubectl patch svc nginx-gateway -n nginx-gateway --type='json' -p='[
+#   {"op": "replace", "path": "/spec/ports/0/nodePort", "value": 30080},
+#   {"op": "replace", "path": "/spec/ports/1/nodePort", "value": 30081}
+# ]'
+
+
+
+# b. GatewayClass Definition
+
+
+# sudo ETCDCTL_API=3 etcdctl snapshot save snapshot.db --cacert=/etc/kubernetes/pki/etcd/ca.crt  --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --endpoints=https://127.0.0.1:2379
