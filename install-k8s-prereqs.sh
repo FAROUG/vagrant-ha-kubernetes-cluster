@@ -135,5 +135,8 @@ newgrp containerd
 ls -ltrh /run/containerd/containerd.sock
 crictl version
 
+# Ensure the bash-completion package is installed system-wide
+sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y bash-completion
+
 
 echo "--- COMMON: Prereqs done ---"
