@@ -47,6 +47,10 @@ export KUBECONFIG=/home/\$(whoami)/.kube/config
 # Install Pod Network Add-on (Calico)
 kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 kubectl get pods -A -o wide
+
+# Local-path-provisioner - Installation
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.32/deploy/local-path-storage.yaml
+
 # --- End of commands running as the vagrant user ---
 EOF
 
