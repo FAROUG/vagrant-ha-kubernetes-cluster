@@ -159,4 +159,11 @@ echo 'alias k=kubectl' | sudo -u "$CURRENT_USER" tee -a /"$CURRENT_USER"/.bashrc
 echo 'complete -F __start_kubectl k' | sudo -u "$CURRENT_USER" tee -a /"$CURRENT_USER"/.bashrc > /dev/null
 
 
+# Installation of the Kubectx
+sudo git clone https://github.com/ahmetb/kubectx /opt/kubectx
+sudo ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx
+
+# Installation of the kubnes
+sudo ln -s /opt/kubectx/kubens /usr/local/bin/kubens
+
 echo "--- COMMON: Prereqs done ---"
