@@ -89,12 +89,15 @@ TOKEN=$(sudo kubeadm token create)
 API_SERVER_ENDPOINT=$(echo $JOIN_COMMAND_WORKER | awk '{print $3}')
 CA_HASH=$(echo $JOIN_COMMAND_WORKER | grep -oP '(?=sha256:).*')
 
-JOIN_CMD_MASTER="sudo kubeadm join $API_SERVER_ENDPOINT --token $TOKEN --discovery-token-ca-cert-hash $CA_HASH --control-plane --certificate-key $CERT_KEY"
+JOIN_CMD_MASTER="sudo kubeadm join $API_SERVER_ENDPOINT --token $TOKEN --discovery-token-ca-cert-hash $CA_HASH --control-plane --certificate-key $CERT_KEY --apiserver-advertise-address PRIVATEIP"
 echo "$JOIN_CMD_MASTER" > $K8S_SHARE_DIR/join_cmd_master.sh
 
 chmod +x $K8S_SHARE_DIR/join_cmd_worker.sh $K8S_SHARE_DIR/join_cmd_master.sh
 echo "--- MASTER: Both join commands saved to shared folder and ready for use ---"
 
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 # The rest of your script goes here (runs as the original user, root in your case)
 echo "Script is running with the correct user: $CURRENT_USER"
