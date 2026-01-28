@@ -1,6 +1,45 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+
+# --- Robust Dynamic Bridge Interface Detection (Cross-Platform) ---
+$network_interface = nil
+default_interface_name = nil # The OS's default gateway interface name (e.g., "en0")
+
+# 1. Detect the OS's default interface name (e.g. en0, eth0, Wi-Fi)
+if Vagrant::Util::Platform.linux?
+  default_interface_name = `ip route | awk '/^default/ {print $5}'`.strip
+elsif Vagrant::Util::Platform.darwin?
+  default_interface_name = `route get default | grep interface | awk '{print $2}'`.strip
+elsif Vagrant::Util::Platform.windows?
+  # Provide the full default path to VBoxManage.exe for Windows hosts
+  vbox_command = "C:\\Program Files\\Oracle\\VirtualBox\\VBoxManage.exe"
+
+  powershell_command = <<-PS
+    \$interface = Get-NetAdapter | Where-Object { 
+      (Get-NetIPConfiguration -InterfaceIndex \$_.InterfaceIndex).IPv4DefaultGateway -ne \$null 
+    } | Select-Object -First 1 -ExpandProperty Name
+    Write-Output \$interface
+  PS
+  default_interface_name = `powershell -Command "#{powershell_command}"`.strip
+end
+
+# 2. Get the list of all valid, descriptive bridge names from VBoxManage
+vbox_bridged_interfaces = `VBoxManage list bridgedifs | grep '^Name:'`.gsub(/Name:\s+/, '').split("\n").map(&:strip)
+
+# 3. Try to find an exact match or a partial match for the default interface
+$network_interface = vbox_bridged_interfaces.find do |full_name|
+  full_name == default_interface_name || full_name.include?(default_interface_name)
+end
+
+# Fallback/Error handling
+if $network_interface.nil?
+  puts "Warning: Automatic network interface detection failed for default gateway '#{default_interface_name}'. Vagrant will prompt you to select one."
+end
+
+# --- End of dynamic detection ---
+
+
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
@@ -13,7 +52,9 @@ Vagrant.configure("2") do |config|
   IP_SUBNET_BASE = "192.168.1" # !! Match your Wi-Fi network subnet !!
 
   BASE_BOX = "bento/ubuntu-22.04" # e.g., "ubuntu/focal64"
-  BRIDGE_INTERFACE = "en0: Wi-Fi" # Your specific Wi-Fi adapter
+  # Use the dynamically found interface name here:
+  BRIDGE_INTERFACE = $network_interface
+  # BRIDGE_INTERFACE = "en0: Wi-Fi" # Your specific Wi-Fi adapter
 
   # New variables for dynamic IP ranges:
   MASTER_START_IP  = 101 # Masters will be .101, .102, .103...
