@@ -8,8 +8,8 @@ echo "======================================================"
 REQUIRED_USER="vagrant"
 CURRENT_USER=$(id -u -n)
 KUBERNETES_VERSION=v1.28
-REQUIRED_USER="vagrant"
-CURRENT_USER=$(id -u -n)
+# REQUIRED_USER="vagrant"
+# CURRENT_USER=$(id -u -n)
 
 echo "Script is running with the user: $CURRENT_USER"
 
@@ -40,7 +40,8 @@ EOF
 sudo sysctl --system
 
 # Install container runtime (containerd is recommended)
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y containerd
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y containerd net-tools
+
 sudo mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml >/dev/null
 sudo mkdir -p /etc/cni/net.d
@@ -48,7 +49,7 @@ sudo systemctl restart containerd
 sudo systemctl enable containerd
 
 # Add Kubernetes repo
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https ca-certificates curl gpg
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https ca-certificates gnupg curl gpg lsb-release
 sudo mkdir -m 0755 -p /etc/apt/keyrings
 curl -fsSL https://pkgs.k8s.io/core:/stable:/$KUBERNETES_VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$KUBERNETES_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
