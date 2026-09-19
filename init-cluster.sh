@@ -109,6 +109,9 @@ sudo chmod 700 get_helm.sh
 sudo ./get_helm.sh
 sudo helm version
 
+# Kustomize Installation
+sudo curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+sudo mv kustomize /usr/local/bin/
 
 # a. Installing Gateway API with NGINX
 # What this does:

@@ -249,4 +249,7 @@ sudo ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx
 # Installation of the kubnes
 sudo ln -s /opt/kubectx/kubens /usr/local/bin/kubens
 
+# Installation of tree package in noninteractive mode for automation
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y tree
+
 echo "--- COMMON: Prereqs done ---"

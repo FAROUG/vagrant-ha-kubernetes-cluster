@@ -47,8 +47,8 @@ end
 Vagrant.configure("2") do |config|
 
   # === CONFIGURATION VARIABLES (Modify these only) ===
-  NUM_MASTERS = 2  # Best practice for HA is 3 or 5 masters
-  NUM_WORKERS = 2  # Number of worker/data nodes
+  NUM_MASTERS = 3  # Best practice for HA is 3 or 5 masters
+  NUM_WORKERS = 5  # Number of worker/data nodes
   IP_SUBNET_BASE = "192.168.1" # !! Match your Wi-Fi network subnet !!
 
   BASE_BOX = "bento/ubuntu-22.04" # e.g., "ubuntu/focal64"
